@@ -1,6 +1,6 @@
 ## C++ socket example
 
-Just a dummy socket example 
+Example on how to use sockets in C++ 
 
 ---
 
