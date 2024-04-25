@@ -71,17 +71,18 @@ void messager(std::vector<c_client>& clients, int idx, bool& quit)
         else
         {
 
-            std::string message = rtrim(ltrim(name))+"~ " + std::string(buffer)+"\n";
-            std::cout << message << " " << nmlen << std::endl;
+            std::string message = rtrim(ltrim(name))+"~ " + std::string(buffer) + "\n";
+            std::cout << message << "           length:" << trim(message).length() << std::endl;
+            
             for (int i=0; i<clients.size(); i++)
             {
                 if(i!=idx)
                 {
-                    send(clients[i].sock, ltrim(rtrim(message)).c_str(), sizeof(rtrim(ltrim(message))) , 0 );
+
+                    send(clients[i].sock, message.c_str(), message.length()*sizeof(char) , 0 );
                 }
             }
-            //data =0;
-            //std::cout << data << std::endl;
+
         }
 
     }
@@ -96,14 +97,14 @@ void acceptance(std::vector<c_client> &clients, bool &quit, int server_sock) // 
     char buffer[1024] = {};
     std::string welcome = "Welcome Insert your name:";
     int numclient = 0;
-    std::cout << "in"<< std::endl;
+    std::cout << "Server Started: "<< std::endl;
     std::vector<std::thread> mex;
     while (!quit)
     {
         sockaddr_in newclient;
         clients.push_back(c_client(server_sock));
         numclient+=1;
-        //std::cout << clients.size() << std::endl;
+       
 
         if(clients[numclient-1].sock<0)
         {
@@ -175,7 +176,7 @@ int main ( int argument, char const *argv[] )
                                     std::ref(quit),
                                     server_sock   );//, server_sock, , server_address_length);
     accept_clients.join();
-    std::cout << "here"<< std::endl;
+    
 
     return 0;
     }
