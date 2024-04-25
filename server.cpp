@@ -71,7 +71,7 @@ void messager(std::vector<c_client>& clients, int idx, bool& quit)
         else
         {
 
-            std::string message = rtrim(ltrim(name))+"~ " + std::string(buffer) + "\n";
+            std::string message = rtrim(ltrim(name))+"~ " + std::string(buffer) + "\n|";
             std::cout << message << "           length:" << trim(message).length() << std::endl;
             
             for (int i=0; i<clients.size(); i++)
@@ -105,17 +105,13 @@ void acceptance(std::vector<c_client> &clients, bool &quit, int server_sock) // 
         clients.push_back(c_client(server_sock));
         numclient+=1;
        
-
-        if(clients[numclient-1].sock<0)
-        {
-                std::cout << "qua" << std::endl;
-                quit = true;
-         }
-        std::cout << "accepted " <<  std::endl;
+        if(clients[numclient-1].sock<0) quit = true;
+        
         send(clients[numclient-1].sock, welcome.c_str(), sizeof(welcome) , 0 );
         recv(clients[numclient-1].sock, buffer, 1024,0);
-        std::cout << buffer << std::endl;
+        std::cout << "accepted: " << buffer << std::endl;
         clients[numclient-1].name = std::string(buffer);
+       
         std::thread mexx(messager,std::ref(clients), numclient-1, std::ref(quit));
         mex.push_back(std::move(mexx));
         mex[mex.size()-1].detach();
