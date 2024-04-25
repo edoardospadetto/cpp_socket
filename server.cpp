@@ -55,7 +55,6 @@ struct c_client{
 void messager(std::vector<c_client>& clients, int idx, bool& quit)
 {
 
-
     int data;
     bool c_exit = false;
     std::string name = clients[idx].name;
@@ -71,7 +70,7 @@ void messager(std::vector<c_client>& clients, int idx, bool& quit)
         else
         {
 
-            std::string message = rtrim(ltrim(name))+"~ " + std::string(buffer) + "\n|";
+            std::string message = rtrim(ltrim(name))+"~ " + std::string(buffer) + "\n";
             std::cout << message << "           length:" << trim(message).length() << std::endl;
             
             for (int i=0; i<clients.size(); i++)
@@ -94,13 +93,14 @@ void acceptance(std::vector<c_client> &clients, bool &quit, int server_sock) // 
 {
     //char* ehi = "Welcome";
 
-    char buffer[1024] = {};
+    
     std::string welcome = "Welcome Insert your name:";
     int numclient = 0;
     std::cout << "Server Started: "<< std::endl;
     std::vector<std::thread> mex;
     while (!quit)
     {
+        char buffer[1024] = {};
         sockaddr_in newclient;
         clients.push_back(c_client(server_sock));
         numclient+=1;
