@@ -15,6 +15,11 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 
+#include <mutex> 
+  
+
+std::mutex mtx;
+
 #define PORT 8080
 
 // trim from start
@@ -49,6 +54,7 @@ struct c_client{
         sock= accept(server_sock,
             (struct sockaddr *)&addr,
             (socklen_t*)&tsize );
+        mtx.lock(); // this is very ugly
     }
 };
 
@@ -61,7 +67,9 @@ void messager(std::vector<c_client>& clients, int idx, bool& quit)
     int nmlen = sizeof(name)/sizeof(char);
 
     while(!c_exit)
-    {   char buffer[1024] = {};
+    {   
+        if (idx >= clients.size()) break;
+        char buffer[1024] = {};
         data = recv(clients[idx].sock, buffer, 1024,0);
         if(data <= 0)
         {
@@ -69,18 +77,27 @@ void messager(std::vector<c_client>& clients, int idx, bool& quit)
         }
         else
         {
-
-            std::string message = rtrim(ltrim(name))+"~ " + std::string(buffer) + "\n";
-            std::cout << message << "           length:" << trim(message).length() << std::endl;
-            
-            for (int i=0; i<clients.size(); i++)
+            mtx.lock();
+            if(strcmp(buffer,"!bye") == 0 ) 
             {
-                if(i!=idx)
-                {
+                send(clients[idx].sock, "bye!", 4*sizeof(char) , 0 );
+                std::cout << "removed: " <<  clients[idx].name << std::endl;
 
-                    send(clients[i].sock, message.c_str(), message.length()*sizeof(char) , 0 );
+                clients.erase (clients.begin()+idx);
+            }
+            else {
+                std::string message = rtrim(ltrim(name))+"~ " + std::string(buffer) + "\n";
+                std::cout << message << "           length:" << trim(message).length() << std::endl;
+                
+                for (int i=0; i<clients.size(); i++)
+                {
+                    if(i!=idx)
+                    {
+                        send(clients[i].sock, message.c_str(), message.length()*sizeof(char) , 0 );
+                    }
                 }
             }
+            mtx.unlock();
 
         }
 
@@ -102,7 +119,10 @@ void acceptance(std::vector<c_client> &clients, bool &quit, int server_sock) // 
     {
         char buffer[1024] = {};
         sockaddr_in newclient;
+        
         clients.push_back(c_client(server_sock));
+        mtx.unlock(); // this is very ugly
+        
         numclient+=1;
        
         if(clients[numclient-1].sock<0) quit = true;

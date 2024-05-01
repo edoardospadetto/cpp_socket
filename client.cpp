@@ -34,10 +34,21 @@ void client_send(int serverSocket, bool &exit)
 	{
 		std::string data;
         std::getline (std::cin,data);
-        if(data == "!q") exit = true; 
-        send(serverSocket, data.c_str(), data.length()*sizeof(char), 0);
-        
+        if(data[0] == '!'){
+        std::cout << "COMMAND |"<<data<<"|" << std::endl;
+        	if(data.compare("!q") == 0 ) {
+        		exit = true;
+        		std::cout << "Bye!" << std::endl;
+        		data = "!bye";
+        		send(serverSocket, data.c_str(), data.length()*sizeof(char), 0);
+
+        	}
+       	}
+        else{ 
+        	send(serverSocket, data.c_str(), data.length()*sizeof(char), 0);
+        }
 	}
+	close(serverSocket);
 
 }
 
